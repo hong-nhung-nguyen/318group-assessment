@@ -59,4 +59,48 @@ class TravelAssistantControllerTest {
         verify(catalogueClient).getAllPackages();
         verify(chatModel).chat(anyString());
     }
+
+    @Test
+    void recommendParsesStructuredAnswerAndDropsPackagesNotInCatalogue() throws Exception {
+
+        when(catalogueClient.getAllPackages())
+                .thenReturn("""
+                        [
+                          {
+                            "packageId": 1,
+                            "name": "Japan Winter Escape",
+                            "destination": "Japan",
+                            "description": "A 7-day winter holiday in Japan."
+                          }
+                        ]
+                        """);
+
+        when(chatModel.chat(anyString()))
+                .thenReturn("""
+                        ```json
+                        {"summary": "Winter in Japan is magical, and this trip lines up with your dates.",
+                         "recommendations": [
+                           {"packageId": 1, "reason": "Seven snowy days in December match your timing and length."},
+                           {"packageId": 99, "reason": "An invented package that must be dropped."}
+                         ]}
+                        ```
+                        """);
+
+        mockMvc.perform(post("/api/assistant/recommend")
+                        .contentType("application/json")
+                        .content("""
+                                {
+                                  "message": "I want a 7 day trip to Japan in December."
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.response")
+                        .value("Winter in Japan is magical, and this trip lines up with your dates."))
+                .andExpect(jsonPath("$.recommendations.length()").value(1))
+                .andExpect(jsonPath("$.recommendations[0].packageId").value(1))
+                .andExpect(jsonPath("$.recommendations[0].name").value("Japan Winter Escape"))
+                .andExpect(jsonPath("$.recommendations[0].destination").value("Japan"))
+                .andExpect(jsonPath("$.recommendations[0].reason")
+                        .value("Seven snowy days in December match your timing and length."));
+    }
 }

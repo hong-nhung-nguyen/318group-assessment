@@ -31,7 +31,7 @@ test('live filters use departure price and remaining capacity and AI sends form 
   await page.route('**/catalogue-api/**', liveCatalogue);
   await page.route('**/assistant-api/**', async route => {
     expect(route.request().postDataJSON().message).toContain('food');
-    await route.fulfill({ json: { response: '**Consider the Live Tokyo Escape.** It matches your food interests.' } });
+    await route.fulfill({ json: { response: '**Consider the Live Tokyo Escape.** It matches your food interests.', recommendations: [{ packageId: 1, name: 'Live Tokyo Escape', destination: 'Tokyo, Japan', reason: 'Ten days of markets and sushi classes suit your love of food.' }, { packageId: 99, reason: 'Not in the catalogue.' }] } });
   });
   await page.goto('/');
   await expect(page.getByRole('heading', { name: 'Live Tokyo Escape' })).toBeVisible();
@@ -52,6 +52,8 @@ test('live filters use departure price and remaining capacity and AI sends form 
   await expect(page.locator('.msg.bot .bubble').last()).toContainText('Consider the Live Tokyo Escape. It matches your food interests.');
   await expect(page.getByText('Top Match')).toBeVisible();
   await expect(page.locator('.trip-card')).toContainText('1,400');
+  await expect(page.locator('.trip-card')).toHaveCount(1);
+  await expect(page.locator('.why p')).toHaveText('Ten days of markets and sushi classes suit your love of food.');
   await page.getByRole('button', { name: 'Select This Trip' }).click();
   await expect(page.getByRole('dialog').getByRole('heading', { name: 'Live Tokyo Escape' })).toBeVisible();
 });

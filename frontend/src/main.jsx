@@ -131,7 +131,12 @@ function App() {
     try {
       const data = await askAssistant(message);
       const text = plainText(String(data.response ?? ''));
-      setMessages(current => [...current, { role: 'assistant', text, matches: findMatches(text, source) }]);
+      // Prefer the assistant's structured picks; fall back to packages it names in prose.
+      const picks = (Array.isArray(data.recommendations) ? data.recommendations : []).map(pick => {
+        const item = source.find(p => String(p.packageId) === String(pick.packageId)) || source.find(p => pick.name && p.name.toLowerCase() === String(pick.name).toLowerCase());
+        return item ? { item, reason: String(pick.reason ?? '').trim() || item.description } : null;
+      }).filter(Boolean).slice(0, 3);
+      setMessages(current => [...current, { role: 'assistant', text, matches: picks.length ? picks : findMatches(text, source) }]);
     } catch { setAiError('Your travel concierge is unavailable right now. Please try again in a moment.'); }
     finally { setAsking(false); }
   }
