@@ -18,7 +18,7 @@ Open http://localhost:5173. Start Catalogue on port 8081 for live packages and T
 - Cards show the cheapest matching AVAILABLE departure starting today or later. Duration is nights/date difference, displayed as days to follow the draft; confirm the desired business convention with the backend team.
 - If the catalogue is empty or unreachable, three clearly labelled sample trips appear. Samples have no bookable dates or availability. A live catalogue with no matches shows an empty state, never sample results.
 - Illustrative Unsplash photos are stored in `public/images`; fonts use Google Fonts with a sans-serif fallback. Package imagery and featured ranking do not currently come from the backend. The first three live packages appear in the featured section. Photo sources are recorded in `public/images/SOURCES.md`.
-- Package details and AI are accessible native dialogs. AI returns plain text; it currently has no departure data or chat memory on the backend.
+- The AI Assistant is a full-page concierge chat with a greeting, suggestion chips, a typing indicator and a retry on failure. The backend returns plain text with no departure data or chat memory, so recommendation cards are built by matching the catalogue packages named in each reply; "Select This Trip" opens the package details dialog. Package details remain an accessible native dialog.
 - Profile and My Bookings explain that personal account features are coming soon. This homepage does not expose the backend's unfiltered booking list or implement checkout.
 - Catalogue partial failures display missing prices or unconfirmed availability; unknown availability is excluded when filtering by traveller count.
 
